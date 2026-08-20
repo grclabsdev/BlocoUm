@@ -15,13 +15,21 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const APP_NAME = "BlocoUm";
+const APP_DEFAULT_TITLE =
+  "BlocoUm - Gestão financeira e operacional do seu condomínio";
+const APP_TITLE_TEMPLATE = "%s - BlocoUm";
+const APP_DESCRIPTION = "Gestão financeira e operacional do seu condomínio";
+
 // app/layout.tsx
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.APP_URL ?? "https://blocoum.vercel.app"),
+  applicationName: APP_NAME,
   title: {
-    default: "BlocoUm",
-    template: "%s · BlocoUm",
+    default: APP_DEFAULT_TITLE,
+    template: APP_TITLE_TEMPLATE,
   },
+  description: APP_DESCRIPTION,
   icons: {
     icon: [
       { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" },
@@ -35,12 +43,32 @@ export const metadata: Metadata = {
       },
     ],
   },
-  description: "Gestão financeira e operacional do seu condomínio",
   manifest: "/manifest.webmanifest", // gerado automaticamente pelo manifest.ts
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
-    title: "BlocoUm",
+    title: APP_DEFAULT_TITLE,
+    // startUpImage: [],
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  openGraph: {
+    type: "website",
+    siteName: APP_NAME,
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
+  },
+  twitter: {
+    card: "summary",
+    title: {
+      default: APP_DEFAULT_TITLE,
+      template: APP_TITLE_TEMPLATE,
+    },
+    description: APP_DESCRIPTION,
   },
 };
 
@@ -54,7 +82,8 @@ export const viewport = {
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
     <html
-      lang='en'
+      lang='ptbr'
+      dir='ltr'
       className={cn(
         "h-full",
         "antialiased",
