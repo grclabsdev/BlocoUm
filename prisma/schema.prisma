@@ -1,62 +1,107 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
+// Prisma schema file — BlocoUm (Gestão de Condomínio)
+// Conforme AGENTS.md e .agents/rules/data-model-e-regras-de-negocio.md
 
 generator client {
   provider = "prisma-client"
-  output   = "../app/generated/prisma"
+  output   = "../src/generated/prisma"
 }
 
 datasource db {
   provider = "postgresql"
 }
 
-model User {
-  id              String       @id
-  name            String
-  email           String
-  emailVerified   Boolean      @default(false)
-  image           String?
-  createdAt       DateTime     @default(now())
-  updatedAt       DateTime     @updatedAt
-  username        String?
-  displayUsername String?
-  sessions        Session[]
-  accounts        Account[]
-  teammembers     TeamMember[]
-  moradoress      Moradores[]
-  convitess       Convites[]
+// -----------------------------------------------------------------------------
+// Enums do Domínio
+// -----------------------------------------------------------------------------
 
-  @@unique([email])
-  @@unique([username])
+enum PapelUsuario {
+  SINDICO
+  SUBSINDICO
+  CONSELHEIRO
+  MORADOR
+  FUNCIONARIO
+}
+
+enum TipoOcupacao {
+  PROPRIETARIO
+  INQUILINO
+  DEPENDENTE
+}
+
+enum TipoLancamento {
+  RECEITA
+  DESPESA
+}
+
+enum StatusCobranca {
+  PENDENTE
+  PAGO
+  ATRASADO
+  CANCELADO
+}
+
+enum StatusOcorrencia {
+  ABERTA
+  EM_ANDAMENTO
+  RESOLVIDA
+  CANCELADA
+}
+
+enum StatusAssinatura {
+  TRIAL
+  ATIVA
+  EXPIRADA
+  CANCELADA
+}
+
+enum ModuloPago {
+  NUCLEO
+  DOCUMENTOS
+}
+
+// -----------------------------------------------------------------------------
+// Autenticação (Better Auth)
+// -----------------------------------------------------------------------------
+
+model User {
+  id            String    @id @default(cuid())
+  name          String
+  email         String    @unique
+  emailVerified Boolean   @default(false)
+  image         String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+
+  sessions           Session[]
+  accounts           Account[]
+  memberships        Membership[]
+  moradorPerfis      MoradorPerfil[]
+  comunicadoLeituras ComunicadoLeitura[]
+
   @@map("user")
 }
 
 model Session {
-  id                   String   @id
-  expiresAt            DateTime
-  token                String
-  createdAt            DateTime @default(now())
-  updatedAt            DateTime @updatedAt
-  ipAddress            String?
-  userAgent            String?
-  userId               String
-  user                 User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  activeOrganizationId String?
-  activeTeamId         String?
+  id        String   @id @default(cuid())
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([token])
   @@index([userId])
   @@map("session")
 }
 
 model Account {
-  id                    String    @id
-  issuer                String
+  id                    String    @id @default(cuid())
   accountId             String
   providerId            String
   userId                String
+  issuer                String?
   user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
   accessToken           String?
   refreshToken          String?
@@ -68,13 +113,13 @@ model Account {
   createdAt             DateTime  @default(now())
   updatedAt             DateTime  @updatedAt
 
-  @@unique([issuer, accountId], map: "account_issuer_accountId_uidx")
+  @@unique([providerId, accountId])
   @@index([userId])
   @@map("account")
 }
 
 model Verification {
-  id         String   @id
+  id         String   @id @default(cuid())
   identifier String
   value      String
   expiresAt  DateTime
@@ -85,91 +130,298 @@ model Verification {
   @@map("verification")
 }
 
-model Apartamentos {
-  id         String      @id
-  nome       String
-  slug       String
-  logo       String?
-  createdAt  DateTime
-  metadata   String?
-  chavePix   String?
-  cidade     String?
-  unidadess  Unidades[]
-  moradoress Moradores[]
-  convitess  Convites[]
+// -----------------------------------------------------------------------------
+// Entidades Principais do Condomínio (Multi-tenant)
+// -----------------------------------------------------------------------------
 
-  @@unique([slug])
-  @@map("apartamentos")
+model Condominio {
+  id        String   @id @default(cuid())
+  nome      String
+  cnpj      String?
+  endereco  String
+  createdAt DateTime @default(now())
+
+  // Parâmetros configuráveis de rateio e encargos
+  rateioTipo        String   @default("FRACAO_IDEAL") // FRACAO_IDEAL | IGUALITARIO
+  diaVencimento     Int      @default(10)
+  multaAtrasoPct    Decimal  @default(2.0)
+  jurosMesPct       Decimal  @default(1.0)
+
+  blocos       Bloco[]
+  unidades     Unidade[]
+  memberships  Membership[]
+  categorias   LancamentoCategoria[]
+  lancamentos  Lancamento[]
+  comunicados  Comunicado[]
+  areasComuns  AreaComum[]
+  ocorrencias  Ocorrencia[]
+  documentos   Documento[]
+  convites     Convite[]
+  assinaturas  Assinatura[]
 }
 
-model Unidades {
-  id             String       @id
-  name           String
-  memberCount    Int          @default(0)
-  organizationId String
-  apartamentos   Apartamentos @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  createdAt      DateTime
-  updatedAt      DateTime?    @updatedAt
-  fracaoIdeal    Int?
-  teammembers    TeamMember[]
+model Membership {
+  id           String       @id @default(cuid())
+  userId       String
+  condominioId String
+  papel        PapelUsuario
+  ativo        Boolean      @default(true)
+  createdAt    DateTime     @default(now())
 
-  @@index([organizationId])
-  @@map("unidades")
+  condominio   Condominio   @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, condominioId])
+  @@index([condominioId])
 }
 
-model TeamMember {
-  id            String    @id
-  teamId        String
-  unidades      Unidades  @relation(fields: [teamId], references: [id], onDelete: Cascade)
-  userId        String
-  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  membershipKey String?
-  createdAt     DateTime?
+model Bloco {
+  id           String     @id @default(cuid())
+  condominioId String
+  nome         String     // ex: "Bloco A", "Torre 1"
 
-  @@unique([membershipKey])
-  @@index([teamId])
+  condominio   Condominio @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  unidades     Unidade[]
+  comunicados  Comunicado[]
+
+  @@index([condominioId])
+}
+
+model Unidade {
+  id            String     @id @default(cuid())
+  condominioId  String
+  blocoId       String?
+  identificador String     // ex: "Apto 101"
+  fracaoIdeal   Decimal    // percentual usado no rateio (soma das unidades = 100)
+
+  condominio    Condominio      @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  bloco         Bloco?          @relation(fields: [blocoId], references: [id], onDelete: SetNull)
+  moradores     MoradorPerfil[]
+  cobrancas     Cobranca[]
+  reservas      Reserva[]
+  ocorrencias   Ocorrencia[]
+  convites      Convite[]
+
+  @@index([condominioId])
+  @@index([blocoId])
+}
+
+model MoradorPerfil {
+  id           String       @id @default(cuid())
+  userId       String
+  unidadeId    String
+  tipoOcupacao TipoOcupacao
+
+  unidade      Unidade      @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+  user         User         @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([unidadeId])
   @@index([userId])
-  @@map("teamMember")
 }
 
-model Moradores {
-  id             String       @id
-  organizationId String
-  apartamentos   Apartamentos @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  userId         String
-  user           User         @relation(fields: [userId], references: [id], onDelete: Cascade)
-  role           String       @default("member")
-  createdAt      DateTime
+model LancamentoCategoria {
+  id           String         @id @default(cuid())
+  condominioId String
+  nome         String         // ex: "Manutenção", "Folha de pagamento", "Taxa condominial"
+  tipo         TipoLancamento
 
-  @@index([organizationId])
+  condominio   Condominio     @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  lancamentos  Lancamento[]
+
+  @@index([condominioId])
+}
+
+model Lancamento {
+  id           String              @id @default(cuid())
+  condominioId String
+  categoriaId  String
+  tipo         TipoLancamento
+  descricao    String
+  valor        Decimal
+  data         DateTime
+
+  condominio   Condominio          @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  categoria    LancamentoCategoria @relation(fields: [categoriaId], references: [id], onDelete: Restrict)
+
+  @@index([condominioId])
+  @@index([categoriaId])
+}
+
+model Cobranca {
+  id            String         @id @default(cuid())
+  unidadeId     String
+  competencia   DateTime       // mês de referência (UTC)
+  valorOriginal Decimal
+  valorAtual    Decimal        // com multa/juros aplicados, se atrasado
+  vencimento    DateTime
+  status        StatusCobranca @default(PENDENTE)
+  pagoEm        DateTime?
+
+  unidade       Unidade        @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+
+  @@unique([unidadeId, competencia])
+  @@index([unidadeId])
+}
+
+model Comunicado {
+  id           String     @id @default(cuid())
+  condominioId String
+  titulo       String
+  corpo        String
+  blocoId      String?    // null = todos os blocos
+  publicadoEm  DateTime   @default(now())
+
+  condominio   Condominio @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  bloco        Bloco?     @relation(fields: [blocoId], references: [id], onDelete: SetNull)
+  leituras     ComunicadoLeitura[]
+
+  @@index([condominioId])
+  @@index([blocoId])
+}
+
+model ComunicadoLeitura {
+  id           String     @id @default(cuid())
+  comunicadoId String
+  userId       String
+  lidoEm       DateTime   @default(now())
+
+  comunicado   Comunicado @relation(fields: [comunicadoId], references: [id], onDelete: Cascade)
+  user         User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([comunicadoId, userId])
+  @@index([comunicadoId])
   @@index([userId])
-  @@map("moradores")
 }
 
-model Convites {
-  id             String       @id
-  organizationId String
-  apartamentos   Apartamentos @relation(fields: [organizationId], references: [id], onDelete: Cascade)
-  email          String
-  role           String?
-  teamId         String?
-  status         String       @default("pending")
-  expiresAt      DateTime
-  createdAt      DateTime     @default(now())
-  inviterId      String
-  user           User         @relation(fields: [inviterId], references: [id], onDelete: Cascade)
+model AreaComum {
+  id                 String     @id @default(cuid())
+  condominioId       String
+  nome               String     // ex: "Salão de festas", "Churrasqueira"
+  antecedenciaMinHrs Int        @default(24)
 
-  @@index([organizationId])
-  @@index([email])
-  @@map("convites")
+  condominio         Condominio @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  reservas           Reserva[]
+
+  @@index([condominioId])
 }
 
-model RateLimit {
-  id          String @id
-  key         String
-  count       Int
-  lastRequest BigInt
+model Reserva {
+  id           String    @id @default(cuid())
+  areaComumId  String
+  unidadeId    String
+  inicio       DateTime
+  fim          DateTime
+  status       String    @default("CONFIRMADA") // CONFIRMADA | CANCELADA
+  criadoPor    String?   // userId
 
-  @@unique([key])
-  @@map("rateLimit")
+  areaComum    AreaComum @relation(fields: [areaComumId], references: [id], onDelete: Cascade)
+  unidade      Unidade   @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+
+  @@index([areaComumId])
+  @@index([unidadeId])
+}
+
+model Ocorrencia {
+  id           String           @id @default(cuid())
+  condominioId String
+  unidadeId    String?
+  categoria    String
+  titulo       String
+  descricao    String
+  status       StatusOcorrencia @default(ABERTA)
+  criadoPor    String           // userId
+  atribuidoA   String?          // userId
+  createdAt    DateTime         @default(now())
+
+  condominio   Condominio       @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  unidade      Unidade?         @relation(fields: [unidadeId], references: [id], onDelete: SetNull)
+  comentarios  OcorrenciaComentario[]
+
+  @@index([condominioId])
+  @@index([unidadeId])
+}
+
+model OcorrenciaComentario {
+  id           String     @id @default(cuid())
+  ocorrenciaId String
+  autorId      String     // userId
+  texto        String
+  createdAt    DateTime   @default(now())
+
+  ocorrencia   Ocorrencia @relation(fields: [ocorrenciaId], references: [id], onDelete: Cascade)
+
+  @@index([ocorrenciaId])
+}
+
+model Documento {
+  id           String     @id @default(cuid())
+  condominioId String
+  categoria    String     // ATA | REGIMENTO | CONVENCAO | OUTRO
+  titulo       String
+  arquivoUrl   String
+  visivelPara  String     @default("TODOS") // TODOS | CONSELHO
+  createdAt    DateTime   @default(now())
+
+  condominio   Condominio @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+
+  @@index([condominioId])
+}
+
+model Convite {
+  id           String       @id @default(cuid())
+  condominioId String
+  unidadeId    String
+  tipoOcupacao TipoOcupacao @default(PROPRIETARIO)
+  email        String
+  token        String       @unique
+  status       String       @default("PENDENTE") // PENDENTE | ACEITO | EXPIRADO
+  expiresAt    DateTime
+  createdAt    DateTime     @default(now())
+
+  condominio   Condominio   @relation(fields: [condominioId], references: [id], onDelete: Cascade)
+  unidade      Unidade      @relation(fields: [unidadeId], references: [id], onDelete: Cascade)
+
+  @@index([condominioId])
+  @@index([unidadeId])
+}
+
+// -----------------------------------------------------------------------------
+// Assinaturas e Pagamentos por Módulo (AbacatePay)
+// Conforme .agents/rules/assinaturas-e-pagamento-por-modulo.md
+// -----------------------------------------------------------------------------
+
+model Plano {
+  id                  String     @id @default(cuid())
+  modulo              ModuloPago
+  nome                String     // "Plano X" — nome definitivo ainda não decidido, configurável
+  valorMensal         Decimal
+  abacatePayLinkId    String?    // id do Link de Pagamento reutilizável criado na AbacatePay
+  ativo               Boolean    @default(true)
+}
+
+model Assinatura {
+  id                    String           @id @default(cuid())
+  condominioId          String
+  modulo                ModuloPago
+  planoId               String?
+  status                StatusAssinatura @default(TRIAL)
+  trialInicio           DateTime?
+  trialFim              DateTime?
+  validaAte             DateTime?        // até quando o último pagamento cobre acesso
+  abacatePayCustomerId  String?
+  condominio            Condominio       @relation(fields: [condominioId], references: [id])
+  pagamentos            Pagamento[]
+
+  @@unique([condominioId, modulo])
+}
+
+model Pagamento {
+  id                 String     @id @default(cuid())
+  assinaturaId       String
+  referenciaExterna  String     @unique // id do checkout/transparent/payment-link na AbacatePay
+  metodo             String     // PIX | BOLETO | LINK_PAGAMENTO
+  valor              Decimal
+  status             String     // PENDENTE | PAGO | EXPIRADO | ESTORNADO
+  pagoEm             DateTime?
+  assinatura         Assinatura @relation(fields: [assinaturaId], references: [id])
 }
