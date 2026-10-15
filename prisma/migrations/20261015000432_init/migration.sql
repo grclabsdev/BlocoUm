@@ -1,26 +1,47 @@
 -- CreateEnum
-CREATE TYPE "PapelUsuario" AS ENUM ('SINDICO', 'SUBSINDICO', 'CONSELHEIRO', 'MORADOR', 'FUNCIONARIO');
+DO $$ BEGIN
+  CREATE TYPE "PapelUsuario" AS ENUM ('SINDICO', 'SUBSINDICO', 'CONSELHEIRO', 'MORADOR', 'FUNCIONARIO');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "TipoOcupacao" AS ENUM ('PROPRIETARIO', 'INQUILINO', 'DEPENDENTE');
+DO $$ BEGIN
+  CREATE TYPE "TipoOcupacao" AS ENUM ('PROPRIETARIO', 'INQUILINO', 'DEPENDENTE');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "TipoLancamento" AS ENUM ('RECEITA', 'DESPESA');
+DO $$ BEGIN
+  CREATE TYPE "TipoLancamento" AS ENUM ('RECEITA', 'DESPESA');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "StatusCobranca" AS ENUM ('PENDENTE', 'PAGO', 'ATRASADO', 'CANCELADO');
+DO $$ BEGIN
+  CREATE TYPE "StatusCobranca" AS ENUM ('PENDENTE', 'PAGO', 'ATRASADO', 'CANCELADO');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "StatusOcorrencia" AS ENUM ('ABERTA', 'EM_ANDAMENTO', 'RESOLVIDA', 'CANCELADA');
+DO $$ BEGIN
+  CREATE TYPE "StatusOcorrencia" AS ENUM ('ABERTA', 'EM_ANDAMENTO', 'RESOLVIDA', 'CANCELADA');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "StatusAssinatura" AS ENUM ('TRIAL', 'ATIVA', 'EXPIRADA', 'CANCELADA');
+DO $$ BEGIN
+  CREATE TYPE "StatusAssinatura" AS ENUM ('TRIAL', 'ATIVA', 'EXPIRADA', 'CANCELADA');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateEnum
-CREATE TYPE "ModuloPago" AS ENUM ('NUCLEO', 'DOCUMENTOS');
+DO $$ BEGIN
+  CREATE TYPE "ModuloPago" AS ENUM ('NUCLEO', 'DOCUMENTOS');
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- CreateTable
-CREATE TABLE "user" (
+CREATE TABLE IF NOT EXISTS "user" (
     "id" TEXT NOT NULL,
     "name" TEXT NOT NULL,
     "email" TEXT NOT NULL,
@@ -33,7 +54,7 @@ CREATE TABLE "user" (
 );
 
 -- CreateTable
-CREATE TABLE "session" (
+CREATE TABLE IF NOT EXISTS "session" (
     "id" TEXT NOT NULL,
     "expiresAt" TIMESTAMP(3) NOT NULL,
     "token" TEXT NOT NULL,
@@ -47,7 +68,7 @@ CREATE TABLE "session" (
 );
 
 -- CreateTable
-CREATE TABLE "account" (
+CREATE TABLE IF NOT EXISTS "account" (
     "id" TEXT NOT NULL,
     "accountId" TEXT NOT NULL,
     "providerId" TEXT NOT NULL,
@@ -67,7 +88,7 @@ CREATE TABLE "account" (
 );
 
 -- CreateTable
-CREATE TABLE "verification" (
+CREATE TABLE IF NOT EXISTS "verification" (
     "id" TEXT NOT NULL,
     "identifier" TEXT NOT NULL,
     "value" TEXT NOT NULL,
@@ -79,7 +100,7 @@ CREATE TABLE "verification" (
 );
 
 -- CreateTable
-CREATE TABLE "Condominio" (
+CREATE TABLE IF NOT EXISTS "Condominio" (
     "id" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
     "cnpj" TEXT,
@@ -94,7 +115,7 @@ CREATE TABLE "Condominio" (
 );
 
 -- CreateTable
-CREATE TABLE "Membership" (
+CREATE TABLE IF NOT EXISTS "Membership" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
@@ -106,7 +127,7 @@ CREATE TABLE "Membership" (
 );
 
 -- CreateTable
-CREATE TABLE "Bloco" (
+CREATE TABLE IF NOT EXISTS "Bloco" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
@@ -115,7 +136,7 @@ CREATE TABLE "Bloco" (
 );
 
 -- CreateTable
-CREATE TABLE "Unidade" (
+CREATE TABLE IF NOT EXISTS "Unidade" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "blocoId" TEXT,
@@ -126,7 +147,7 @@ CREATE TABLE "Unidade" (
 );
 
 -- CreateTable
-CREATE TABLE "MoradorPerfil" (
+CREATE TABLE IF NOT EXISTS "MoradorPerfil" (
     "id" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
     "unidadeId" TEXT NOT NULL,
@@ -136,7 +157,7 @@ CREATE TABLE "MoradorPerfil" (
 );
 
 -- CreateTable
-CREATE TABLE "LancamentoCategoria" (
+CREATE TABLE IF NOT EXISTS "LancamentoCategoria" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
@@ -146,7 +167,7 @@ CREATE TABLE "LancamentoCategoria" (
 );
 
 -- CreateTable
-CREATE TABLE "Lancamento" (
+CREATE TABLE IF NOT EXISTS "Lancamento" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "categoriaId" TEXT NOT NULL,
@@ -159,7 +180,7 @@ CREATE TABLE "Lancamento" (
 );
 
 -- CreateTable
-CREATE TABLE "Cobranca" (
+CREATE TABLE IF NOT EXISTS "Cobranca" (
     "id" TEXT NOT NULL,
     "unidadeId" TEXT NOT NULL,
     "competencia" TIMESTAMP(3) NOT NULL,
@@ -173,7 +194,7 @@ CREATE TABLE "Cobranca" (
 );
 
 -- CreateTable
-CREATE TABLE "Comunicado" (
+CREATE TABLE IF NOT EXISTS "Comunicado" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "titulo" TEXT NOT NULL,
@@ -185,7 +206,7 @@ CREATE TABLE "Comunicado" (
 );
 
 -- CreateTable
-CREATE TABLE "ComunicadoLeitura" (
+CREATE TABLE IF NOT EXISTS "ComunicadoLeitura" (
     "id" TEXT NOT NULL,
     "comunicadoId" TEXT NOT NULL,
     "userId" TEXT NOT NULL,
@@ -195,7 +216,7 @@ CREATE TABLE "ComunicadoLeitura" (
 );
 
 -- CreateTable
-CREATE TABLE "AreaComum" (
+CREATE TABLE IF NOT EXISTS "AreaComum" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "nome" TEXT NOT NULL,
@@ -205,7 +226,7 @@ CREATE TABLE "AreaComum" (
 );
 
 -- CreateTable
-CREATE TABLE "Reserva" (
+CREATE TABLE IF NOT EXISTS "Reserva" (
     "id" TEXT NOT NULL,
     "areaComumId" TEXT NOT NULL,
     "unidadeId" TEXT NOT NULL,
@@ -218,7 +239,7 @@ CREATE TABLE "Reserva" (
 );
 
 -- CreateTable
-CREATE TABLE "Ocorrencia" (
+CREATE TABLE IF NOT EXISTS "Ocorrencia" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "unidadeId" TEXT,
@@ -234,7 +255,7 @@ CREATE TABLE "Ocorrencia" (
 );
 
 -- CreateTable
-CREATE TABLE "OcorrenciaComentario" (
+CREATE TABLE IF NOT EXISTS "OcorrenciaComentario" (
     "id" TEXT NOT NULL,
     "ocorrenciaId" TEXT NOT NULL,
     "autorId" TEXT NOT NULL,
@@ -245,7 +266,7 @@ CREATE TABLE "OcorrenciaComentario" (
 );
 
 -- CreateTable
-CREATE TABLE "Documento" (
+CREATE TABLE IF NOT EXISTS "Documento" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "categoria" TEXT NOT NULL,
@@ -258,7 +279,7 @@ CREATE TABLE "Documento" (
 );
 
 -- CreateTable
-CREATE TABLE "Convite" (
+CREATE TABLE IF NOT EXISTS "Convite" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "unidadeId" TEXT NOT NULL,
@@ -273,7 +294,7 @@ CREATE TABLE "Convite" (
 );
 
 -- CreateTable
-CREATE TABLE "Plano" (
+CREATE TABLE IF NOT EXISTS "Plano" (
     "id" TEXT NOT NULL,
     "modulo" "ModuloPago" NOT NULL,
     "nome" TEXT NOT NULL,
@@ -285,7 +306,7 @@ CREATE TABLE "Plano" (
 );
 
 -- CreateTable
-CREATE TABLE "Assinatura" (
+CREATE TABLE IF NOT EXISTS "Assinatura" (
     "id" TEXT NOT NULL,
     "condominioId" TEXT NOT NULL,
     "modulo" "ModuloPago" NOT NULL,
@@ -300,7 +321,7 @@ CREATE TABLE "Assinatura" (
 );
 
 -- CreateTable
-CREATE TABLE "Pagamento" (
+CREATE TABLE IF NOT EXISTS "Pagamento" (
     "id" TEXT NOT NULL,
     "assinaturaId" TEXT NOT NULL,
     "referenciaExterna" TEXT NOT NULL,
@@ -313,190 +334,274 @@ CREATE TABLE "Pagamento" (
 );
 
 -- CreateIndex
-CREATE UNIQUE INDEX "user_email_key" ON "user"("email");
+CREATE UNIQUE INDEX IF NOT EXISTS "user_email_key" ON "user"("email");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "session_token_key" ON "session"("token");
+CREATE UNIQUE INDEX IF NOT EXISTS "session_token_key" ON "session"("token");
 
 -- CreateIndex
-CREATE INDEX "session_userId_idx" ON "session"("userId");
+CREATE INDEX IF NOT EXISTS "session_userId_idx" ON "session"("userId");
 
 -- CreateIndex
-CREATE INDEX "account_userId_idx" ON "account"("userId");
+CREATE INDEX IF NOT EXISTS "account_userId_idx" ON "account"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "account_providerId_accountId_key" ON "account"("providerId", "accountId");
+CREATE UNIQUE INDEX IF NOT EXISTS "account_providerId_accountId_key" ON "account"("providerId", "accountId");
 
 -- CreateIndex
-CREATE INDEX "verification_identifier_idx" ON "verification"("identifier");
+CREATE INDEX IF NOT EXISTS "verification_identifier_idx" ON "verification"("identifier");
 
 -- CreateIndex
-CREATE INDEX "Membership_condominioId_idx" ON "Membership"("condominioId");
+CREATE INDEX IF NOT EXISTS "Membership_condominioId_idx" ON "Membership"("condominioId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Membership_userId_condominioId_key" ON "Membership"("userId", "condominioId");
+CREATE UNIQUE INDEX IF NOT EXISTS "Membership_userId_condominioId_key" ON "Membership"("userId", "condominioId");
 
 -- CreateIndex
-CREATE INDEX "Bloco_condominioId_idx" ON "Bloco"("condominioId");
+CREATE INDEX IF NOT EXISTS "Bloco_condominioId_idx" ON "Bloco"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Unidade_condominioId_idx" ON "Unidade"("condominioId");
+CREATE INDEX IF NOT EXISTS "Unidade_condominioId_idx" ON "Unidade"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Unidade_blocoId_idx" ON "Unidade"("blocoId");
+CREATE INDEX IF NOT EXISTS "Unidade_blocoId_idx" ON "Unidade"("blocoId");
 
 -- CreateIndex
-CREATE INDEX "MoradorPerfil_unidadeId_idx" ON "MoradorPerfil"("unidadeId");
+CREATE INDEX IF NOT EXISTS "MoradorPerfil_unidadeId_idx" ON "MoradorPerfil"("unidadeId");
 
 -- CreateIndex
-CREATE INDEX "MoradorPerfil_userId_idx" ON "MoradorPerfil"("userId");
+CREATE INDEX IF NOT EXISTS "MoradorPerfil_userId_idx" ON "MoradorPerfil"("userId");
 
 -- CreateIndex
-CREATE INDEX "LancamentoCategoria_condominioId_idx" ON "LancamentoCategoria"("condominioId");
+CREATE INDEX IF NOT EXISTS "LancamentoCategoria_condominioId_idx" ON "LancamentoCategoria"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Lancamento_condominioId_idx" ON "Lancamento"("condominioId");
+CREATE INDEX IF NOT EXISTS "Lancamento_condominioId_idx" ON "Lancamento"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Lancamento_categoriaId_idx" ON "Lancamento"("categoriaId");
+CREATE INDEX IF NOT EXISTS "Lancamento_categoriaId_idx" ON "Lancamento"("categoriaId");
 
 -- CreateIndex
-CREATE INDEX "Cobranca_unidadeId_idx" ON "Cobranca"("unidadeId");
+CREATE INDEX IF NOT EXISTS "Cobranca_unidadeId_idx" ON "Cobranca"("unidadeId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Cobranca_unidadeId_competencia_key" ON "Cobranca"("unidadeId", "competencia");
+CREATE UNIQUE INDEX IF NOT EXISTS "Cobranca_unidadeId_competencia_key" ON "Cobranca"("unidadeId", "competencia");
 
 -- CreateIndex
-CREATE INDEX "Comunicado_condominioId_idx" ON "Comunicado"("condominioId");
+CREATE INDEX IF NOT EXISTS "Comunicado_condominioId_idx" ON "Comunicado"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Comunicado_blocoId_idx" ON "Comunicado"("blocoId");
+CREATE INDEX IF NOT EXISTS "Comunicado_blocoId_idx" ON "Comunicado"("blocoId");
 
 -- CreateIndex
-CREATE INDEX "ComunicadoLeitura_comunicadoId_idx" ON "ComunicadoLeitura"("comunicadoId");
+CREATE INDEX IF NOT EXISTS "ComunicadoLeitura_comunicadoId_idx" ON "ComunicadoLeitura"("comunicadoId");
 
 -- CreateIndex
-CREATE INDEX "ComunicadoLeitura_userId_idx" ON "ComunicadoLeitura"("userId");
+CREATE INDEX IF NOT EXISTS "ComunicadoLeitura_userId_idx" ON "ComunicadoLeitura"("userId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "ComunicadoLeitura_comunicadoId_userId_key" ON "ComunicadoLeitura"("comunicadoId", "userId");
+CREATE UNIQUE INDEX IF NOT EXISTS "ComunicadoLeitura_comunicadoId_userId_key" ON "ComunicadoLeitura"("comunicadoId", "userId");
 
 -- CreateIndex
-CREATE INDEX "AreaComum_condominioId_idx" ON "AreaComum"("condominioId");
+CREATE INDEX IF NOT EXISTS "AreaComum_condominioId_idx" ON "AreaComum"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Reserva_areaComumId_idx" ON "Reserva"("areaComumId");
+CREATE INDEX IF NOT EXISTS "Reserva_areaComumId_idx" ON "Reserva"("areaComumId");
 
 -- CreateIndex
-CREATE INDEX "Reserva_unidadeId_idx" ON "Reserva"("unidadeId");
+CREATE INDEX IF NOT EXISTS "Reserva_unidadeId_idx" ON "Reserva"("unidadeId");
 
 -- CreateIndex
-CREATE INDEX "Ocorrencia_condominioId_idx" ON "Ocorrencia"("condominioId");
+CREATE INDEX IF NOT EXISTS "Ocorrencia_condominioId_idx" ON "Ocorrencia"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Ocorrencia_unidadeId_idx" ON "Ocorrencia"("unidadeId");
+CREATE INDEX IF NOT EXISTS "Ocorrencia_unidadeId_idx" ON "Ocorrencia"("unidadeId");
 
 -- CreateIndex
-CREATE INDEX "OcorrenciaComentario_ocorrenciaId_idx" ON "OcorrenciaComentario"("ocorrenciaId");
+CREATE INDEX IF NOT EXISTS "OcorrenciaComentario_ocorrenciaId_idx" ON "OcorrenciaComentario"("ocorrenciaId");
 
 -- CreateIndex
-CREATE INDEX "Documento_condominioId_idx" ON "Documento"("condominioId");
+CREATE INDEX IF NOT EXISTS "Documento_condominioId_idx" ON "Documento"("condominioId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Convite_token_key" ON "Convite"("token");
+CREATE UNIQUE INDEX IF NOT EXISTS "Convite_token_key" ON "Convite"("token");
 
 -- CreateIndex
-CREATE INDEX "Convite_condominioId_idx" ON "Convite"("condominioId");
+CREATE INDEX IF NOT EXISTS "Convite_condominioId_idx" ON "Convite"("condominioId");
 
 -- CreateIndex
-CREATE INDEX "Convite_unidadeId_idx" ON "Convite"("unidadeId");
+CREATE INDEX IF NOT EXISTS "Convite_unidadeId_idx" ON "Convite"("unidadeId");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Assinatura_condominioId_modulo_key" ON "Assinatura"("condominioId", "modulo");
+CREATE UNIQUE INDEX IF NOT EXISTS "Assinatura_condominioId_modulo_key" ON "Assinatura"("condominioId", "modulo");
 
 -- CreateIndex
-CREATE UNIQUE INDEX "Pagamento_referenciaExterna_key" ON "Pagamento"("referenciaExterna");
+CREATE UNIQUE INDEX IF NOT EXISTS "Pagamento_referenciaExterna_key" ON "Pagamento"("referenciaExterna");
 
 -- AddForeignKey
-ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "session" ADD CONSTRAINT "session_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "account" ADD CONSTRAINT "account_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Membership" ADD CONSTRAINT "Membership_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Membership" ADD CONSTRAINT "Membership_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Membership" ADD CONSTRAINT "Membership_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Bloco" ADD CONSTRAINT "Bloco_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Bloco" ADD CONSTRAINT "Bloco_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Unidade" ADD CONSTRAINT "Unidade_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Unidade" ADD CONSTRAINT "Unidade_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Unidade" ADD CONSTRAINT "Unidade_blocoId_fkey" FOREIGN KEY ("blocoId") REFERENCES "Bloco"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Unidade" ADD CONSTRAINT "Unidade_blocoId_fkey" FOREIGN KEY ("blocoId") REFERENCES "Bloco"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "MoradorPerfil" ADD CONSTRAINT "MoradorPerfil_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "MoradorPerfil" ADD CONSTRAINT "MoradorPerfil_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "MoradorPerfil" ADD CONSTRAINT "MoradorPerfil_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "MoradorPerfil" ADD CONSTRAINT "MoradorPerfil_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "LancamentoCategoria" ADD CONSTRAINT "LancamentoCategoria_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "LancamentoCategoria" ADD CONSTRAINT "LancamentoCategoria_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Lancamento" ADD CONSTRAINT "Lancamento_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Lancamento" ADD CONSTRAINT "Lancamento_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Lancamento" ADD CONSTRAINT "Lancamento_categoriaId_fkey" FOREIGN KEY ("categoriaId") REFERENCES "LancamentoCategoria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Lancamento" ADD CONSTRAINT "Lancamento_categoriaId_fkey" FOREIGN KEY ("categoriaId") REFERENCES "LancamentoCategoria"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Cobranca" ADD CONSTRAINT "Cobranca_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Cobranca" ADD CONSTRAINT "Cobranca_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Comunicado" ADD CONSTRAINT "Comunicado_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Comunicado" ADD CONSTRAINT "Comunicado_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Comunicado" ADD CONSTRAINT "Comunicado_blocoId_fkey" FOREIGN KEY ("blocoId") REFERENCES "Bloco"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Comunicado" ADD CONSTRAINT "Comunicado_blocoId_fkey" FOREIGN KEY ("blocoId") REFERENCES "Bloco"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "ComunicadoLeitura" ADD CONSTRAINT "ComunicadoLeitura_comunicadoId_fkey" FOREIGN KEY ("comunicadoId") REFERENCES "Comunicado"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ComunicadoLeitura" ADD CONSTRAINT "ComunicadoLeitura_comunicadoId_fkey" FOREIGN KEY ("comunicadoId") REFERENCES "Comunicado"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "ComunicadoLeitura" ADD CONSTRAINT "ComunicadoLeitura_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "ComunicadoLeitura" ADD CONSTRAINT "ComunicadoLeitura_userId_fkey" FOREIGN KEY ("userId") REFERENCES "user"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "AreaComum" ADD CONSTRAINT "AreaComum_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "AreaComum" ADD CONSTRAINT "AreaComum_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Reserva" ADD CONSTRAINT "Reserva_areaComumId_fkey" FOREIGN KEY ("areaComumId") REFERENCES "AreaComum"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Reserva" ADD CONSTRAINT "Reserva_areaComumId_fkey" FOREIGN KEY ("areaComumId") REFERENCES "AreaComum"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Reserva" ADD CONSTRAINT "Reserva_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Reserva" ADD CONSTRAINT "Reserva_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Ocorrencia" ADD CONSTRAINT "Ocorrencia_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Ocorrencia" ADD CONSTRAINT "Ocorrencia_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Ocorrencia" ADD CONSTRAINT "Ocorrencia_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Ocorrencia" ADD CONSTRAINT "Ocorrencia_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE SET NULL ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "OcorrenciaComentario" ADD CONSTRAINT "OcorrenciaComentario_ocorrenciaId_fkey" FOREIGN KEY ("ocorrenciaId") REFERENCES "Ocorrencia"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "OcorrenciaComentario" ADD CONSTRAINT "OcorrenciaComentario_ocorrenciaId_fkey" FOREIGN KEY ("ocorrenciaId") REFERENCES "Ocorrencia"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Documento" ADD CONSTRAINT "Documento_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Documento" ADD CONSTRAINT "Documento_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Convite" ADD CONSTRAINT "Convite_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Convite" ADD CONSTRAINT "Convite_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Convite" ADD CONSTRAINT "Convite_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Convite" ADD CONSTRAINT "Convite_unidadeId_fkey" FOREIGN KEY ("unidadeId") REFERENCES "Unidade"("id") ON DELETE CASCADE ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Assinatura" ADD CONSTRAINT "Assinatura_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Assinatura" ADD CONSTRAINT "Assinatura_condominioId_fkey" FOREIGN KEY ("condominioId") REFERENCES "Condominio"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
 
 -- AddForeignKey
-ALTER TABLE "Pagamento" ADD CONSTRAINT "Pagamento_assinaturaId_fkey" FOREIGN KEY ("assinaturaId") REFERENCES "Assinatura"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+DO $$ BEGIN
+  ALTER TABLE "Pagamento" ADD CONSTRAINT "Pagamento_assinaturaId_fkey" FOREIGN KEY ("assinaturaId") REFERENCES "Assinatura"("id") ON DELETE RESTRICT ON UPDATE CASCADE;
+EXCEPTION WHEN duplicate_object THEN NULL;
+END $$;
